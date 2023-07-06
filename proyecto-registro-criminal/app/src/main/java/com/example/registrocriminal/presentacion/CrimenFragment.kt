@@ -2,6 +2,8 @@ package com.example.registrocriminal.presentacion
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
 import android.net.Uri
 import android.os.Bundle
 import android.provider.ContactsContract
@@ -121,7 +123,10 @@ class CrimenFragment : Fragment() {
             btnSospechoso.setOnClickListener{
              selectorSospechoso.launch(null)
             }
-
+            val intentSeleccionarSuspicious=selectorSospechoso.contract.createIntent(
+                requireContext(), null
+            )
+            btnSospechoso.isEnabled=puedeResolveIntent(intentSeleccionarSuspicious)
         }
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -162,6 +167,16 @@ class CrimenFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun puedeResolveIntent(intent: Intent):Boolean{
+        val packageManager:PackageManager = requireActivity().packageManager
+        val resolveActivity: ResolveInfo? =
+            packageManager.resolveActivity(
+                intent,
+                PackageManager.MATCH_DEFAULT_ONLY
+            )
+        return resolveActivity != null
     }
 
     private fun actualizarUI(crimen: Crimen) {
