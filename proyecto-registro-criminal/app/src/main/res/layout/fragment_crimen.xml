@@ -39,4 +39,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/etiqueta_crimen_resuelto"/>
+
+    <Button
+        android:id="@+id/btn_sospechoso"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_sospechoso" />
+
+    <Button
+        android:id="@+id/btn_reporte"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_reporte" />
 </LinearLayout>

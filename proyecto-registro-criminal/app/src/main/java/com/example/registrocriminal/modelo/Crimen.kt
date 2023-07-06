@@ -11,5 +11,6 @@ data class Crimen(
     val titulo: String,
     val fecha: Date,
     val resuelto: Boolean,
-    val mayor: Boolean
+    val mayor: Boolean,
+    val sospechoso: String = ""
 )

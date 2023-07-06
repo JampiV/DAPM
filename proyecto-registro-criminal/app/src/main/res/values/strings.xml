@@ -11,7 +11,19 @@
     <string name="etiqueta_detalle_crimen">Detalle</string>
     <string name="etiqueta_crimen_resuelto">Resuelto</string>
     <string name="titulo_date_picker">Fecha del crimen</string>
+
+    <string name="btn_sospechoso">Seleccionar sospechoso</string>
+    <string name="btn_reporte">Enviar reporte</string>
+    
+    <string name="reporte_Crimen">%1$s!
+    El crimen fue descubierto en %2$s. %3$s y %4$s.</string>
+    <string name="reporte_resuelto">El caso está resuelto</string>
+    <string name="reporte_no_resuelto">El caso no está resuelto</string>
+    <string name="reporte_sin_sospechoso">no hay sospechoso</string>
+    <string name="reporte_con_sospechoso">El sospechoso es %s.</string>
+    <string name="reporte_asunto">el sospechoso es.</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
 
 </resources>

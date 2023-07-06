@@ -1,10 +1,15 @@
 package com.example.registrocriminal.presentacion
 
+import android.annotation.SuppressLint
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.ContactsContract
 import android.view.*
 import androidx.fragment.app.Fragment
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.setFragmentResultListener
@@ -20,9 +25,11 @@ import com.example.registrocriminal.modelo.Crimen
 import com.example.registrocriminal.presentacion.viewmodel.CrimenViewModel
 import com.example.registrocriminal.presentacion.viewmodel.CrimenViewModelFactory
 import kotlinx.coroutines.launch
+import java.text.DateFormat
 import java.util.*
 
 private const val TAG = "registroCriminal"
+private const val FORMATO_FECHA="EEE, MMM, dd"
 class CrimenFragment : Fragment() {
     private lateinit var crimen: Crimen
     private var _binding: FragmentCrimenBinding? = null
@@ -35,6 +42,25 @@ class CrimenFragment : Fragment() {
         CrimenViewModelFactory(args.crimenId)
     }
 
+   // @SuppressLint("StringFormatInvalid") //si no funciona se va a la .
+    private fun getReporteCrimen(crimen: Crimen):String{
+        val stringCrimenResuelto=if(crimen.resuelto){
+            getString(R.string.reporte_resuelto)
+        }else{
+            getString(R.string.reporte_no_resuelto)
+        }
+        val stringFecha= android.text.format.DateFormat.format(FORMATO_FECHA, crimen.fecha).toString()
+        val textoSospechoso=if(crimen.sospechoso.isBlank()){
+            getString(R.string.reporte_sin_sospechoso)
+        }else{
+            getString(R.string.reporte_con_sospechoso, crimen.sospechoso)
+        }
+        return getString(
+            R.string.reporte_Crimen,
+            crimen.titulo,stringFecha,stringCrimenResuelto,textoSospechoso
+        )
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -44,7 +70,32 @@ class CrimenFragment : Fragment() {
             container,
             false
         )
+        binding.btnSospechoso.apply {
+            setOnClickListener{
+                selectorSospechoso.launch(null)
+            }
+        }
         return binding.root
+    }
+
+    private val selectorSospechoso=registerForActivityResult(
+        ActivityResultContracts.PickContact()
+    ){uri:Uri? ->
+        uri?.let { obtenerContactosSeleccionado(it)}
+    }
+    private fun obtenerContactosSeleccionado(UriContacto: Uri){
+        val campoConsulta = arrayOf(ContactsContract.Contacts.DISPLAY_NAME)
+        val cursoConsulta = requireActivity().contentResolver.query(
+            UriContacto, campoConsulta, null, null, null
+        )
+        cursoConsulta?.use { cursor ->
+            if(cursor.moveToFirst()){
+                val culpable=cursor.getString(0)
+                crimenViewModel.actualizarCrimen { anterior ->
+                    anterior.copy(sospechoso = culpable)
+                }
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -66,6 +117,9 @@ class CrimenFragment : Fragment() {
                     anterior.copy(resuelto = seleccionado)
                 }
 //                crimen = crimen.copy(resuelto = seleccionado)
+            }
+            btnSospechoso.setOnClickListener{
+             selectorSospechoso.launch(null)
             }
 
         }
@@ -116,7 +170,6 @@ class CrimenFragment : Fragment() {
                 txtTituloCrimen.setText(crimen.titulo)
             }
             btnFechaCrimen.text = crimen.fecha.toString()
-//            btnHoraCrimen.text = crimen.fecha.hours.toString()
             btnHoraCrimen.text = "Actualizar Hora"
             btnHoraCrimen.setOnClickListener{
                 findNavController().navigate(
@@ -129,6 +182,20 @@ class CrimenFragment : Fragment() {
                 )
             }
             chkCrimenResuelto.isChecked = crimen.resuelto
+
+            btnReporte.setOnClickListener{
+                val intentReporte=Intent(Intent.ACTION_SEND).apply {
+                    type="text/plain"
+                    putExtra(Intent.EXTRA_TEXT, getReporteCrimen(crimen))
+                    putExtra(Intent.EXTRA_SUBJECT, R.string.reporte_asunto)
+                }
+                val intentSelector=Intent.createChooser(intentReporte,
+                getString(R.string.btn_reporte))
+                startActivity(intentSelector)
+            }
+            btnSospechoso.text=crimen.sospechoso.ifEmpty {
+                getString(R.string.btn_sospechoso)
+            }
         }
     }
 

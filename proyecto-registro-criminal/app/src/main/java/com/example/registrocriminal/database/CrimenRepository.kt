@@ -19,7 +19,7 @@ class CrimenRepository private constructor(
         context.applicationContext,
         CrimenDatabase::class.java,
         DATABASE_NAME
-    ).build()
+    ).addMigrations(migration_1_2).build()
 
     fun getCrimenes(): Flow<List<Crimen>> = database.crimenDAO().getCrimenes()
     suspend fun getCrimen(id: UUID): Crimen = database.crimenDAO().getCrimen(id)
